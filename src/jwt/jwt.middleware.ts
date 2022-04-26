@@ -16,8 +16,7 @@ export class JwtMiddleware implements NestMiddleware {
       if (typeof decoded === 'object' && decoded.hasOwnProperty('id')) {
         try {
           const user = await this.userService.findById(decoded['id']);
-          console.log(user);
-          req['user'] = user;
+          req['user'] = user; // 이거는 req.user 왜 사용하지 못하는걸까?
         } catch (error) {
             console.log(error)
         }

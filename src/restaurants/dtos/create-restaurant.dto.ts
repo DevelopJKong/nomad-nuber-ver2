@@ -1,4 +1,4 @@
-import { Restaurant } from './../entities/restaurants.entity';
+import { Restaurant } from '../entities/restaurants.entity';
 import { InputType, OmitType } from '@nestjs/graphql';
 
 @InputType()

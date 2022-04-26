@@ -1,5 +1,11 @@
+import { Verification } from './users/entities/verification.entity';
 import { User } from './users/entities/user.entity';
-import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import {
+  MiddlewareConsumer,
+  Module,
+  NestModule,
+  RequestMethod,
+} from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { GraphQLModule } from '@nestjs/graphql';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,6 +14,7 @@ import { UsersModule } from './users/users.module';
 import { CommonModule } from './common/common.module';
 import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from './jwt/jwt.middleware';
+import { AuthModule } from './auth/auth.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -21,7 +28,7 @@ import { JwtMiddleware } from './jwt/jwt.middleware';
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_NAME: Joi.string().required(),
-        PRIVATE_KEY:Joi.string().required()
+        PRIVATE_KEY: Joi.string().required(),
       }),
     }),
     TypeOrmModule.forRoot({
@@ -33,14 +40,18 @@ import { JwtMiddleware } from './jwt/jwt.middleware';
       database: process.env.DB_NAME,
       synchronize: true,
       logging: true,
-      entities:[User],
+      entities: [User,Verification],
     }),
-    GraphQLModule.forRoot({ autoSchemaFile: true }),
+    GraphQLModule.forRoot({
+      autoSchemaFile: true,
+      context: ({ req }) => ({
+        user: req['user'],
+      }),
+    }),
     JwtModule.forRoot({
-      privateKey : process.env.PRIVATE_KEY
+      privateKey: process.env.PRIVATE_KEY,
     }),
     UsersModule,
-    CommonModule,
   ],
   controllers: [],
   providers: [],
@@ -49,6 +60,6 @@ export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
     consumer
       .apply(JwtMiddleware)
-      .forRoutes({ path: '/graphql', method: RequestMethod.ALL });
+      .forRoutes({ path: '/graphql', method: RequestMethod.POST });
   }
 }
