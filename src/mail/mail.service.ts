@@ -22,7 +22,7 @@ export class MailService {
     subject: string,
     template: string,
     emailVars: EmailVar[],
-  ) {
+  ): Promise<boolean> {
     const form = new FormData();
     form.append(
       'from',
@@ -42,8 +42,10 @@ export class MailService {
         },
         body: form,
       });
+      return true;
     } catch (error) {
       console.log(error);
+      return false;
     }
   }
 
