@@ -1,3 +1,4 @@
+import { AuthModule } from './auth/auth.module';
 import { Category } from './restaurants/entities/category.entity';
 import { Restaurant } from './restaurants/entities/restaurants.entity';
 import { Verification } from './users/entities/verification.entity';
@@ -17,11 +18,6 @@ import { JwtModule } from './jwt/jwt.module';
 import { JwtMiddleware } from './jwt/jwt.middleware';
 import { MailModule } from './mail/mail.module';
 import { RestaurantsModule } from './restaurants/restaurants.module';
-import * as winston from 'winston';
-import {
-  utilities as nestWinstonModuleUtilities,
-  WinstonModule,
-} from 'nest-winston';
 import { LoggerModule } from './logger/logger.module';
 
 @Module({
@@ -71,11 +67,10 @@ import { LoggerModule } from './logger/logger.module';
     LoggerModule.forRoot({
       nodeEnv: process.env.NODE_ENV,
     }),
+    AuthModule,
     UsersModule,
     RestaurantsModule,
   ],
-  controllers: [],
-  providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
