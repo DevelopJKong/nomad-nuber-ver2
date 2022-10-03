@@ -68,7 +68,9 @@ import { LoggerModule } from './logger/logger.module';
       domain: process.env.MAILGUN_DOMAIN_NAME,
       fromEmail: process.env.MAILGUN_FROM_EMAIL,
     }),
-    LoggerModule.forRoot(),
+    LoggerModule.forRoot({
+      nodeEnv: process.env.NODE_ENV,
+    }),
     UsersModule,
     RestaurantsModule,
   ],
