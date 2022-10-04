@@ -1,3 +1,8 @@
+import { LoggerService } from './../logger/logger.service';
+import {
+  EditRestaurantOutput,
+  EditRestaurantInput,
+} from './dtos/edit-restaurant.dto';
 import { Category } from './entities/category.entity';
 import { User } from './../users/entities/user.entity';
 import {
@@ -16,7 +21,22 @@ export class RestaurantsService {
     private readonly restaurants: Repository<Restaurant>,
     @InjectRepository(Category)
     private readonly categories: Repository<Category>,
+    private readonly loggerService: LoggerService,
   ) {}
+
+  async getOrCreateCategory(name: string) {
+    const categoryName = name.trim().toLocaleUpperCase();
+    const categorySlug = categoryName.replace(/ /g, '-');
+    let category: Category | Category[] = await this.categories.find({
+      slug: categorySlug,
+    });
+    if (!category) {
+      category = await this.categories.save(
+        this.categories.create({ slug: categorySlug, name: categoryName }),
+      );
+    }
+    return category;
+  }
 
   async createRestaurant(
     owner: User,
@@ -26,20 +46,12 @@ export class RestaurantsService {
       const newRestaurant = this.restaurants.create(createRestaurantInput);
       newRestaurant.owner = owner;
 
-      const categoryName = createRestaurantInput.categoryName
-        .trim()
-        .toLocaleUpperCase();
-      const categorySlug = categoryName.replace(/ /g, '-');
-      let category: Category | Category[] = await this.categories.find({
-        slug: categorySlug,
-      });
+      //TODO 애초에 Category가 배열로 들어가는 경우가 있을까?
+      const category: Category = (await this.getOrCreateCategory(
+        createRestaurantInput.categoryName,
+      )) as Category;
 
-      if (!category) {
-        category = await this.categories.save(
-          this.categories.create({ slug: categorySlug, name: categoryName }),
-        );
-      }
-
+      newRestaurant.category = category;
       return {
         ok: true,
       };
@@ -47,6 +59,58 @@ export class RestaurantsService {
       return {
         ok: false,
         error: 'Could not create restaurant',
+      };
+    }
+  }
+
+  async editRestaurant(
+    owner: User,
+    editRestaurantInput: EditRestaurantInput,
+  ): Promise<EditRestaurantOutput> {
+    try {
+      const restaurant = await this.restaurants.findOne(
+        editRestaurantInput.restaurantId,
+      );
+
+      if (!restaurant) {
+        //! 레스토랑 데이터가 존재하지 않습니다
+        this.loggerService
+          .logger()
+          .error(`${this.loggerService.loggerInfo()} 레스토랑 데이터가 미존재`);
+        return {
+          ok: false,
+          error: 'Restaurant not found',
+        };
+      }
+
+      if (owner.id !== restaurant.ownerId) {
+        //! 유저 아이디와 레스트랑의 유저 아이디가 불일치 할 경우
+        this.loggerService
+          .logger()
+          .error(
+            `${this.loggerService.loggerInfo()} 유저 아이디와 레스트랑의 유저 아이디가 불일치`,
+          );
+        return {
+          ok: false,
+          error: "You can't edit a restaurant that you don't own",
+        };
+      }
+
+      //* success
+      this.loggerService
+        .logger()
+        .error(`${this.loggerService.loggerInfo()} 레스토랑 편집 성공`);
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      //! extraError
+      this.loggerService
+        .logger()
+        .error(`${this.loggerService.loggerInfo()} extra Error`);
+      return {
+        ok: false,
+        error: 'Could not edit Restaurant',
       };
     }
   }
