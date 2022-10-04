@@ -19,6 +19,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
+import { CategoryOutput, CategoryInput } from './dtos/category.dto';
 
 @Injectable()
 export class RestaurantsService {
@@ -165,7 +166,6 @@ export class RestaurantsService {
   async allCategories(): Promise<AllCategoriesOutput> {
     try {
       const categories = await this.categories.find();
-
       return {
         ok: true,
         categories,
@@ -179,8 +179,45 @@ export class RestaurantsService {
   }
 
   async countRestaurants(category: Category) {
-    return this.restaurants.count({
-      where: { category: category.restaurants }, //TODO 정확하게 파악하기
+    const count = this.restaurants.count({
+      //TODO 정확하게 파악하기
+      //! 정상 작동하는 거 확인 완료
+      where: {
+        category: {
+          slug: category.slug,
+        },
+      },
     });
+    return count;
+  }
+
+  async findCategoryBySlug({ slug }: CategoryInput): Promise<CategoryOutput> {
+    try {
+      const category = await this.categories.findOne({
+        where: {
+          slug,
+        },
+        relations: {
+          restaurants: true,
+        },
+      });
+      console.log(category);
+      if (!category) {
+        return {
+          ok: false,
+          error: 'Category not found',
+        };
+      }
+
+      return {
+        ok: true,
+        category,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Could not load category',
+      };
+    }
   }
 }

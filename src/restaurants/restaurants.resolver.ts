@@ -1,3 +1,4 @@
+import { CategoryInput, CategoryOutput } from './dtos/category.dto';
 import { AllCategoriesOutput } from './dtos/all-categories.dto';
 import { Category } from './entities/category.entity';
 import { User } from './../users/entities/user.entity';
@@ -74,5 +75,12 @@ export class CategoryResolver {
   @Query((type) => AllCategoriesOutput)
   allCategories(): Promise<AllCategoriesOutput> {
     return this.restaurantsService.allCategories();
+  }
+
+  @Query((type) => CategoryOutput)
+  async category(
+    @Args('input') categoryInput: CategoryInput,
+  ): Promise<CategoryOutput> {
+    return this.restaurantsService.findCategoryBySlug(categoryInput);
   }
 }
