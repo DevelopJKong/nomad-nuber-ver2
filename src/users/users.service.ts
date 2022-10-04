@@ -34,7 +34,7 @@ export class UsersService {
     //check new user
     //create user & hash password
     try {
-      const exists = await this.users.findOne({ email });
+      const exists = await this.users.findOne({ where: { email } });
 
       if (exists) {
         //! 유저가 이미 존재하는 경우 error
@@ -78,10 +78,10 @@ export class UsersService {
   async login({ email, password }: LoginInput): Promise<LoginOutput> {
     // make a JWT and give it to the user
     try {
-      const user = await this.users.findOne(
-        { email },
-        { select: ['id', 'password'] },
-      );
+      const user = await this.users.findOne({
+        where: { email },
+        select: { id: true, password: true },
+      });
       if (!user) {
         return {
           ok: false,
@@ -110,7 +110,7 @@ export class UsersService {
   }
   async findById(id: number): Promise<UserProfileOutput> {
     try {
-      const user = await this.users.findOneOrFail({ id });
+      const user = await this.users.findOneOrFail({ where: { id } });
       if (user) {
         return {
           ok: true,
@@ -127,7 +127,7 @@ export class UsersService {
     { email, password }: EditProfileInput,
   ): Promise<EditProfileOutput> {
     try {
-      const user = await this.users.findOne(userId);
+      const user = await this.users.findOne({ where: { id: userId } });
       if (email) {
         user.email = email;
         user.verified = false;
@@ -150,10 +150,14 @@ export class UsersService {
 
   async verifyEmail(code: string): Promise<VerifyEmailOutput> {
     try {
-      const verification = await this.verifications.findOne(
-        { code },
-        { relations: ['user'] },
-      );
+      const verification = await this.verifications.findOne({
+        where: {
+          code,
+        },
+        relations: {
+          user: true,
+        },
+      });
       if (verification) {
         verification.user.verified = true;
         await this.users.save(verification.user);

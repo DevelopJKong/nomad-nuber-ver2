@@ -1,3 +1,4 @@
+import { CategoryRepository } from './repositories/category.repsository';
 import { LoggerService } from './../logger/logger.service';
 import {
   EditRestaurantOutput,
@@ -20,23 +21,9 @@ export class RestaurantsService {
     @InjectRepository(Restaurant)
     private readonly restaurants: Repository<Restaurant>,
     @InjectRepository(Category)
-    private readonly categories: Repository<Category>,
+    private readonly categories: CategoryRepository,
     private readonly loggerService: LoggerService,
   ) {}
-
-  async getOrCreateCategory(name: string) {
-    const categoryName = name.trim().toLocaleUpperCase();
-    const categorySlug = categoryName.replace(/ /g, '-');
-    let category: Category | Category[] = await this.categories.find({
-      slug: categorySlug,
-    });
-    if (!category) {
-      category = await this.categories.save(
-        this.categories.create({ slug: categorySlug, name: categoryName }),
-      );
-    }
-    return category;
-  }
 
   async createRestaurant(
     owner: User,
@@ -47,10 +34,9 @@ export class RestaurantsService {
       newRestaurant.owner = owner;
 
       //TODO 애초에 Category가 배열로 들어가는 경우가 있을까?
-      const category: Category = (await this.getOrCreateCategory(
+      const category: Category = (await this.categories.getOrCreateCategory(
         createRestaurantInput.categoryName,
       )) as Category;
-
       newRestaurant.category = category;
       return {
         ok: true,
@@ -68,9 +54,11 @@ export class RestaurantsService {
     editRestaurantInput: EditRestaurantInput,
   ): Promise<EditRestaurantOutput> {
     try {
-      const restaurant = await this.restaurants.findOne(
-        editRestaurantInput.restaurantId,
-      );
+      const restaurant = await this.restaurants.findOne({
+        where: {
+          ownerId: editRestaurantInput.restaurantId,
+        },
+      });
 
       if (!restaurant) {
         //! 레스토랑 데이터가 존재하지 않습니다
@@ -95,6 +83,20 @@ export class RestaurantsService {
           error: "You can't edit a restaurant that you don't own",
         };
       }
+      let category: Category | Category[] = null;
+      if (editRestaurantInput.categoryName) {
+        category = await this.categories.getOrCreateCategory(
+          editRestaurantInput.categoryName,
+        );
+      }
+
+      await this.restaurants.save([
+        {
+          id: editRestaurantInput.restaurantId,
+          ...editRestaurantInput,
+          ...(category && { category }),
+        },
+      ]);
 
       //* success
       this.loggerService
