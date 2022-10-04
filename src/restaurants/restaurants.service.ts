@@ -1,3 +1,7 @@
+import {
+  DeleteRestaurantInput,
+  DeleteRestaurantOutput,
+} from './dtos/delete-restaurant.dto';
 import { CategoryRepository } from './repositories/category.repsository';
 import { LoggerService } from './../logger/logger.service';
 import {
@@ -83,7 +87,7 @@ export class RestaurantsService {
           error: "You can't edit a restaurant that you don't own",
         };
       }
-      let category: Category | Category[] = null;
+      let category: Category = null;
       if (editRestaurantInput.categoryName) {
         category = await this.categories.getOrCreateCategory(
           editRestaurantInput.categoryName,
@@ -113,6 +117,45 @@ export class RestaurantsService {
       return {
         ok: false,
         error: 'Could not edit Restaurant',
+      };
+    }
+  }
+
+  //TODO 체크하는 funciton 새롭게 만들기 [Code 챌린지]
+  async deleteRestaurant(
+    owner: User,
+    { restaurantId }: DeleteRestaurantInput,
+  ): Promise<DeleteRestaurantOutput> {
+    try {
+      const restaurant = await this.restaurants.findOne({
+        where: {
+          ownerId: restaurantId,
+        },
+      });
+
+      if (!restaurant) {
+        return {
+          ok: false,
+          error: 'Restaurant not found',
+        };
+      }
+
+      if (owner.id !== restaurant.ownerId) {
+        return {
+          ok: false,
+          error: 'You cant delete a restaurant that you dont own',
+        };
+      }
+
+      await this.restaurants.delete(restaurantId);
+
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Could not delete restaurant',
       };
     }
   }
