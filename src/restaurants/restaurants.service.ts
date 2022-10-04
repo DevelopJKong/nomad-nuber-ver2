@@ -18,6 +18,7 @@ import { Restaurant } from './entities/restaurants.entity';
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { AllCategoriesOutput } from './dtos/all-categories.dto';
 
 @Injectable()
 export class RestaurantsService {
@@ -156,6 +157,21 @@ export class RestaurantsService {
       return {
         ok: false,
         error: 'Could not delete restaurant',
+      };
+    }
+  }
+
+  async allCategories(): Promise<AllCategoriesOutput> {
+    try {
+      const categories = await this.categories.find();
+
+      return {
+        ok: true,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Could not load categories',
       };
     }
   }
