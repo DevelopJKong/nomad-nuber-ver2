@@ -1,4 +1,7 @@
-import { SearchRestaurantInput } from './dtos/search-restaurant.dto';
+import {
+  SearchRestaurantInput,
+  SearchRestaurantOutput,
+} from './dtos/search-restaurant.dto';
 import { RestaurantInput, RestaurantOutput } from './dtos/restaurant.dto';
 import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
 import {
@@ -279,15 +282,19 @@ export class RestaurantsService {
   async searchRestaurant({
     query,
     page,
-  }: SearchRestaurantInput): Promise<RestaurantOutput> {
+  }: SearchRestaurantInput): Promise<SearchRestaurantOutput> {
     try {
       const [restaurants, totalResults] = await this.restaurants.findAndCount({
         where: {
           name: ILike(`%${query}%`),
         },
       });
+
       return {
         ok: true,
+        restaurants,
+        totalResults,
+        totalPages: Math.ceil(totalResults / 25),
       };
     } catch (error) {
       return {
