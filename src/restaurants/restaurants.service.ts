@@ -1,3 +1,4 @@
+import { RestaurantsInput, RestaurantsOutput } from './dtos/restaurants.dto';
 import {
   DeleteRestaurantInput,
   DeleteRestaurantOutput,
@@ -219,10 +220,10 @@ export class RestaurantsService {
         skip: (page - 1) * 25,
       });
 
-      category.restaurants = restaurants;
       const totalResults = await this.countRestaurants(category);
       return {
         ok: true,
+        restaurants,
         category,
         totalPages: Math.ceil(totalResults / 25),
       };
@@ -230,6 +231,27 @@ export class RestaurantsService {
       return {
         ok: false,
         error: 'Could not load category',
+      };
+    }
+  }
+
+  async allRestaurants({ page }: RestaurantsInput): Promise<RestaurantsOutput> {
+    try {
+      const [restaurants, totalResults] = await this.restaurants.findAndCount({
+        take: 25,
+        skip: (page - 1) * 25,
+      });
+
+      return {
+        ok: true,
+        results: restaurants,
+        totalPages: Math.ceil(totalResults / 25),
+        totalResults,
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        error: 'Could not load restaurants',
       };
     }
   }
