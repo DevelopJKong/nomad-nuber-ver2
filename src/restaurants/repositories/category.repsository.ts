@@ -3,7 +3,7 @@ import { Repository } from 'typeorm';
 
 export class CategoryRepository extends Repository<Category> {
   async getOrCreateCategory(name: string) {
-    const categoryName = name.trim().toLocaleUpperCase();
+    const categoryName = name.trim().toLowerCase();
     const categorySlug = categoryName.replace(/ /g, '-');
     let category: Category = await this.findOne({
       where: {

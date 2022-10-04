@@ -43,6 +43,7 @@ export class RestaurantsService {
         createRestaurantInput.categoryName,
       )) as Category;
       newRestaurant.category = category;
+      await this.restaurants.save(newRestaurant);
       return {
         ok: true,
       };
@@ -167,6 +168,7 @@ export class RestaurantsService {
 
       return {
         ok: true,
+        categories,
       };
     } catch (error) {
       return {
@@ -174,5 +176,11 @@ export class RestaurantsService {
         error: 'Could not load categories',
       };
     }
+  }
+
+  async countRestaurants(category: Category) {
+    return this.restaurants.count({
+      where: { category: category.restaurants }, //TODO 정확하게 파악하기
+    });
   }
 }
