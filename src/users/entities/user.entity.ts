@@ -12,7 +12,7 @@ import { InternalServerErrorException } from '@nestjs/common';
 import { IsEmail, IsEnum, IsString } from 'class-validator';
 
 export enum UserRole {
-  Client = 'Client',
+  Client = 'Client',  
   Owner = 'Owner',
   Delivery = 'Delivery',
 }
@@ -29,7 +29,7 @@ export class User extends CoreEntity {
   email: string;
 
   @Field((type) => String)
-  @Column({ select: true })
+  @Column({ select: true }) //? 왜 select가 true로? 되어 있지? 기존에는 false 아니였나?
   @IsString()
   password: string;
 

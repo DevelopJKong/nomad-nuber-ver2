@@ -78,24 +78,49 @@ export class LoggerService {
     }
     return logger;
   }
-  loggerInfo(): string {
+  /**
+   * *로그 정보 string return 함수
+   *
+   *  ! custom 사용자 커스텀 메시지
+   *  ! message 에러 메시지
+   *  ! name  에러 이름
+   *  ! stack  에러 스택
+   *  ! return 최종 메시지
+   */
+  loggerInfo = (
+    custom: string | null = '',
+    message: string | null = '',
+    name: string | null = '',
+    stack: string | null = '',
+  ): string => {
     try {
-      throw Error('');
-    } catch (err) {
-      const callerLine: string = err.stack.split('\n')[2];
-      const apiNameArray: Array<string> = callerLine.split(' ');
-      const apiName: string = apiNameArray.filter(
-        (item: string) => item !== null && item !== undefined && item !== '',
+      throw Error(message);
+    } catch (error) {
+      const callerLine = error.stack.split('\n')[2];
+      const apiNameArray = callerLine.split(' ');
+      const apiName = apiNameArray.filter(
+        (item) => item !== null && item !== undefined && item !== '',
       )[1];
-      let LineNumber: string = callerLine
+      let LineNumber = callerLine
         .split('(')[1]
         .split('/')
         .slice(-1)[0]
         .slice(0, -1);
       if (LineNumber.includes('C:')) {
-        LineNumber = `${LineNumber.split('\\').slice(-1)[0]}`;
+        LineNumber = `(TEST) ${LineNumber.split('\\').slice(-1)[0]}`;
       }
-      return `Line Number: ${LineNumber} ::: ${apiName} | Message:`;
+
+      const lineNumberText = `Line Number: ${LineNumber} ::: ${apiName} | `;
+      const errorMessage = `${
+        error.message ? `Error Message: ${error.message} | ` : ''
+      }`;
+      const errorName = `${name ? `Error Name: ${name} | ` : ''}`;
+      const errorStack = `${
+        stack ? `Error Stack: ${stack.split('\n')[1].trim()} | ` : ''
+      }`;
+      const customMessage = `${custom ? `Custom Message : ${custom}` : ''}`;
+
+      return `${lineNumberText}${errorMessage}${errorName}${errorStack}${customMessage}`;
     }
-  }
+  };
 }
