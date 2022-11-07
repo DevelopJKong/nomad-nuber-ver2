@@ -5,7 +5,7 @@ import { CategoryResolver, RestaurantsResolver } from './restaurants.resolver';
 import { Module } from '@nestjs/common';
 import { Category } from './entities/category.entity';
 import { provideCustomRepository } from 'src/common/custom-repository';
-import { CategoryRepository } from './repositories/category.repsository';
+import { CategoryRepository } from './repositories/category.repository';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Restaurant, Category])],

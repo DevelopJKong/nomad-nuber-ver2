@@ -81,11 +81,13 @@ export class LoggerService {
   /**
    * *로그 정보 string return 함수
    *
-   *  ! custom 사용자 커스텀 메시지
-   *  ! message 에러 메시지
-   *  ! name  에러 이름
-   *  ! stack  에러 스택
-   *  ! return 최종 메시지
+   *  @title 로그 정보를 보여주는 api
+   *  @description 에러 정보를 어떤 라인에서 발생했는지 확실하게 보고 싶을때 사용하는 logger를 만듬
+   *  @param {string | null} custom 사용자 커스텀 메시지
+   *  @param {string | null} message 에러 메시지
+   *  @param {string | null} name  에러 이름
+   *  @param {string | null} stack  에러 스택
+   *  @return {string} 최종 메시지
    */
   loggerInfo = (
     custom: string | null = '',
@@ -96,31 +98,36 @@ export class LoggerService {
     try {
       throw Error(message);
     } catch (error) {
-      const callerLine = error.stack.split('\n')[2];
-      const apiNameArray = callerLine.split(' ');
-      const apiName = apiNameArray.filter(
-        (item) => item !== null && item !== undefined && item !== '',
-      )[1];
-      let LineNumber = callerLine
-        .split('(')[1]
-        .split('/')
-        .slice(-1)[0]
-        .slice(0, -1);
-      if (LineNumber.includes('C:')) {
-        LineNumber = `(TEST) ${LineNumber.split('\\').slice(-1)[0]}`;
+      try {
+        const callerLine = error.stack.split('\n')[2];
+        const apiNameArray = callerLine.split(' ');
+        const apiName = apiNameArray.filter(
+          (item: string) => item !== null && item !== undefined && item !== '',
+        )[1];
+        let LineNumber = callerLine
+          .split('(')[1]
+          .split('/')
+          .slice(-1)[0]
+          .slice(0, -1);
+        if (LineNumber.includes('C:')) {
+          LineNumber = `${LineNumber.split('\\').slice(-1)[0]}`;
+        }
+
+        const lineNumberText = `Line Number: ${LineNumber} ::: ${apiName} | `;
+        const errorMessage = `${
+          error.message ? `Error Message: ${error.message} | ` : ''
+        }`;
+        const errorName = `${name ? `Error Name: ${name} | ` : ''}`;
+        const errorStack = `${
+          stack ? `Error Stack: ${stack.split('\n')[1].trim()} | ` : ''
+        }`;
+        const customMessage = `${custom ? `Custom Message : ${custom}` : ''}`;
+
+        return `${lineNumberText}${errorMessage}${errorName}${errorStack}${customMessage}`;
+      } catch (error) {
+        const { message, stack, name } = error;
+        return `Error Message ::: ${message} | Error Stack ::: ${stack} | Error Name ::: ${name}`;
       }
-
-      const lineNumberText = `Line Number: ${LineNumber} ::: ${apiName} | `;
-      const errorMessage = `${
-        error.message ? `Error Message: ${error.message} | ` : ''
-      }`;
-      const errorName = `${name ? `Error Name: ${name} | ` : ''}`;
-      const errorStack = `${
-        stack ? `Error Stack: ${stack.split('\n')[1].trim()} | ` : ''
-      }`;
-      const customMessage = `${custom ? `Custom Message : ${custom}` : ''}`;
-
-      return `${lineNumberText}${errorMessage}${errorName}${errorStack}${customMessage}`;
     }
   };
 }

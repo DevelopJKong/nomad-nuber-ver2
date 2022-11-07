@@ -29,7 +29,10 @@ import {
   DeleteRestaurantInput,
   DeleteRestaurantOutput,
 } from './dtos/delete-restaurant.dto';
-import { SearchRestaurantOutput, SearchRestaurantInput } from './dtos/search-restaurant.dto';
+import {
+  SearchRestaurantOutput,
+  SearchRestaurantInput,
+} from './dtos/search-restaurant.dto';
 
 @Resolver((of) => Restaurant)
 export class RestaurantsResolver {
@@ -72,17 +75,17 @@ export class RestaurantsResolver {
     return this.restaurantsService.allRestaurants(restaurantsInput);
   }
 
-  @Query( returns => RestaurantOutput)
+  @Query((returns) => RestaurantOutput)
   restaurant(
-    @Args('input') restaurantInput:RestaurantInput
-  ):Promise<RestaurantOutput> {
+    @Args('input') restaurantInput: RestaurantInput,
+  ): Promise<RestaurantOutput> {
     return this.restaurantsService.findRestaurantById(restaurantInput);
   }
 
-  @Query(returns => SearchRestaurantOutput)
+  @Query((returns) => SearchRestaurantOutput)
   searchRestaurant(
-    @Args('input') searchRestaurantInput: SearchRestaurantInput
-  ):Promise<SearchRestaurantOutput> {
+    @Args('input') searchRestaurantInput: SearchRestaurantInput,
+  ): Promise<SearchRestaurantOutput> {
     return this.restaurantsService.searchRestaurant(searchRestaurantInput);
   }
 }

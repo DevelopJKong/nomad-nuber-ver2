@@ -8,7 +8,7 @@ import {
   DeleteRestaurantInput,
   DeleteRestaurantOutput,
 } from './dtos/delete-restaurant.dto';
-import { CategoryRepository } from './repositories/category.repsository';
+import { CategoryRepository } from './repositories/category.repository';
 import { LoggerService } from './../logger/logger.service';
 import {
   EditRestaurantOutput,
@@ -130,7 +130,7 @@ export class RestaurantsService {
     }
   }
 
-  //TODO 체크하는 funciton 새롭게 만들기 [Code 챌린지]
+  //TODO 체크하는 function 새롭게 만들기 [Code 챌린지]
   async deleteRestaurant(
     owner: User,
     { restaurantId }: DeleteRestaurantInput,
