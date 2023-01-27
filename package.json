@@ -40,6 +40,8 @@
     "graphql": "^15.8.0",
     "joi": "^17.6.0",
     "jsonwebtoken": "^8.5.1",
+    "mariadb": "^3.0.2",
+    "mysql2": "^3.0.1",
     "nest-winston": "^1.7.0",
     "pg": "^8.7.3",
     "reflect-metadata": "^0.1.13",
